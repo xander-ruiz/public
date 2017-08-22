@@ -1,0 +1,285 @@
+<html>
+<head>
+	<title>AUTobot</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	
+
+<script type="text/javascript">	
+	
+		var accessToken = "c4e0e253323c41c68d02ac6ad70e5f83";
+		var baseUrl = "https://api.api.ai/v1/";
+
+		$(document).ready(function() {
+			$("#inputButton").keypress(function(event) {
+				if (event.which == 13) {
+					event.preventDefault();
+					send();
+				}
+			});
+			$("#rec").click(function(event) {
+				switchRecognition();
+			});
+		});
+
+		var recognition;
+
+		function startRecognition() {
+			recognition = new webkitSpeechRecognition();
+			recognition.onstart = function(event) {
+				updateRec();
+			};
+			recognition.onresult = function(event) {
+				var text = "";
+			    for (var i = event.resultIndex; i < event.results.length; ++i) {
+			    	text += event.results[i][0].transcript;
+			    }
+			    setInput(text);
+				stopRecognition();
+			};
+			recognition.onend = function() {
+				stopRecognition();
+			};
+			recognition.lang = "en-US";
+			recognition.start();
+		}
+	
+		function stopRecognition() {
+			if (recognition) {
+				recognition.stop();
+				recognition = null;
+			}
+			updateRec();
+		}
+
+		function switchRecognition() {
+			if (recognition) {
+				stopRecognition();
+			} else {
+				startRecognition();
+			}
+		}
+
+		function setInput(text) {
+			$("#inputButton").val(text);
+			send();
+		}
+
+		function updateRec() {
+			$("#rec").text(recognition ? "Stop" : "Speak to me");
+		}
+
+		function send() 
+		{
+					
+			var text = $("#inputButton").val();
+			$.ajax({
+				type: "POST",
+				url: baseUrl + "query?v=20150910",
+				contentType: "application/json; charset=utf-8",
+				dataType: "json",
+				headers: {
+					"Authorization": "Bearer " + accessToken
+				},
+				data: JSON.stringify({ query: text, lang: "en", sessionId: "somerandomthing" }),
+
+				success: function(data) {
+					setResponse(JSON.stringify(data, undefined, 2));
+				},
+				error: function() {
+					setResponse("Internal Server Error");
+				}
+			});
+		}
+
+		function setResponse(val) 
+		{
+			var obj = $.parseJSON( val );
+			var response = obj['result'].fulfillment.messages[0].speech
+			document.getElementById('chatArea').value += "USER: " + document.getElementById('inputButton').value + "\n\n>>AUTobot: " + response + "\n\n";			
+			document.getElementById('inputButton').value = "";
+
+			// Keep scroll to bottom
+			var textarea = document.getElementById('chatArea');
+			textarea.scrollTop = textarea.scrollHeight;			
+
+			//	Bot speaking		
+			if(document.getElementById('checkboxBotSpeaks').checked)
+			{
+				speak(response);
+			}		
+		}
+
+
+    function debugRespond(val) {
+      $("#response").text(val);
+    }
+
+    function speak(val) {
+        var msg = new SpeechSynthesisUtterance();
+        msg.voiceURI = "native";
+        msg.text = val;
+        msg.lang = "en-US";
+        window.speechSynthesis.speak(msg);
+      $("#spokenResponse").addClass("is-active").find(".spoken-response__text").html(val);
+    }
+	
+	//	Show/hide Chat log				
+	function ShowChatLog() {
+			if(!document.getElementById('checkboxChatLog').checked)
+			{
+				document.getElementById("divChatLog").style.display = 'none';				
+			}	
+			else
+				document.getElementById("divChatLog").style.display = 'block';		
+	}
+	
+	
+</script>
+
+<style type="text/css">
+body{
+	font: Verdana, Geneva, serif;	
+}
+.form-style-10{
+	max-width:450px;
+	padding:30px;
+	margin:40px auto;
+	border-radius: 10px;
+	-webkit-border-radius:10px;
+	-moz-border-radius: 10px;
+	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.13);
+	-moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.13);
+	-webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.13);
+	background: #F8F8F8;
+	
+}
+.form-style-10 h1{
+	background: #2A88AD;
+	padding: 10px 00px 10px 30px;
+	margin: -30px -30px 30px -30px;
+	border-radius: 10px 10px 0 0;
+	-webkit-border-radius: 10px 10px 0 0;
+	-moz-border-radius: 10px 10px 0 0;
+	color: #fff;
+	font: normal 30px 'Bitter', serif;
+	-moz-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
+	-webkit-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
+	box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
+	border: 1px solid #257C9E;
+}
+.form-style-10 h1 > span{
+	display: block;
+	margin-top: 2px;
+	font: normal 14px Verdana, Geneva, serif;
+}
+.form-style-10 label{
+	display: block;
+	color: #888;
+	margin-bottom: 5px;
+}
+.form-style-10 input[type="text"],
+.form-style-10 input[type="date"],
+.form-style-10 input[type="datetime"],
+.form-style-10 input[type="email"],
+.form-style-10 input[type="number"],
+.form-style-10 input[type="search"],
+.form-style-10 input[type="time"],
+.form-style-10 input[type="url"],
+.form-style-10 input[type="password"],
+.form-style-10 .spoken-response__text,
+.form-style-10 textarea,
+.form-style-10 select {
+	display: block;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	width: 100%;
+	padding: 8px;
+	border-radius: 6px;
+	-webkit-border-radius:6px;
+	-moz-border-radius:6px;
+	border: 2px solid #fff;
+	box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.33);
+	-moz-box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.33);
+	-webkit-box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.33);
+}
+
+.form-style-10 .section{
+	font: normal 14px Verdana, Geneva, sans-serif;
+	color: #2A88AD;
+	margin-bottom: 4px;
+}
+.form-style-10 .section span {
+	background: #2A88AD;
+	padding: 5px 10px 5px 10px;
+	position: absolute;
+	border-radius: 50%;
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
+	border: 4px solid #fff;
+	font-size: 14px;
+	margin-left: -45px;
+	color: #fff;
+	margin-top: -3px;
+}
+.form-style-10 input[type="button"], 
+.form-style-10 input[type="submit"]{
+	background: #2A88AD;
+	padding: 8px 20px 8px 20px;
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	color: #fff;
+	text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.12);	
+	-moz-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
+	-webkit-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
+	box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
+	border: 1px solid #257C9E;
+	font-size: 15px;
+}
+.form-style-10 input[type="button"]:hover, 
+.form-style-10 input[type="submit"]:hover{
+	background: #2A6881;
+	-moz-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.28);
+	-webkit-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.28);
+	box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.28);
+}
+</style>
+</head>
+
+<BODY>
+
+
+<TABLE align=center>
+<tr>
+<td valign=top>
+<center><img src='.\chatbot-laydown.jpg' /></center>
+<div class="form-style-10">
+<h1>Ask me anything !<span>I can provide you information you need.</span></h1>   
+    <div class="section"><span>1</span>You :
+	<input id="inputButton" type="text"><button id="rec">Speak to me</button></div>
+    <div class="section"><span>2</span>AUTobot :</div>
+		<div id="spokenResponse" class="spoken-response">
+			<div class="spoken-response__text"><br>
+		</div>
+	</div>
+<div id="divConfigure" class="section"><span>3</span>Configure<br>	
+	<label><input id="checkboxBotSpeaks" type="checkbox" checked>AUTobot speaking</input><br>	
+	<input id="checkboxChatLog" type="checkbox" checked onclick="ShowChatLog();">Show Chat Log</input>	</label>
+</div></div>
+</td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td>
+<div class="form-style-10">
+<div id="divChatLog" class="section"><span>4</span>Chat Log :	
+		<textarea id="chatArea" cols="60" rows="35" ></textarea>
+</div></div>	 
+</td>
+
+</tr>
+</TABLE>
+
+
+</BODY>
+</html>
