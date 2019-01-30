@@ -1,0 +1,55 @@
+div.jsgallery {
+  background-color: #000;
+  align:center;
+  width: 100%; 
+}
+
+div.jsgallery_button_container button {
+  cursor:pointer;  
+  margin: 0px 0 0 0;  
+  background-color:transparent;
+  border: 0;
+  padding: 0px 0 0 0;  
+  margin: 0;
+}
+
+div.jsgallery_button_container button img {
+  vertical-align:middle;
+  border: 0;
+  margin: 2px;
+}
+
+div.jsgallery_image img {
+  width: 550px;
+  height:300px; 
+}
+
+div.jsgallery_image{
+  margin:0px;
+}
+
+div.jsgallery_title{
+  margin:2px;
+  font-family: Arial, Verdana;
+  font-size:7.5pt;
+  font-weight: bold;
+}
+
+div.jsgallery_thumbnail_container {
+  overflow:auto-scroll;
+  padding-top: 10;
+}
+
+div.jsgallery_thumbnail_container img {
+  width: 40px;  
+  height:40px;
+  filter:alpha(opacity=50);
+  opacity:0.5;    
+  vertical-align:middle;
+  border-top: solid 2px #888;
+  border-left: solid 2px #888;
+  border-bottom: solid 2px #333;
+  border-right: solid 2px #333;
+  margin: 0 auto;
+  cursor: pointer;
+}
